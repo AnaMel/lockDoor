@@ -9,6 +9,7 @@ class App extends React.Component {
     render() {
       return (
           <main>
+            <p>Start the session when you are home, and we will remind you to lock the door when you will be leaving!</p>
             <SetUp />
           </main>
       )

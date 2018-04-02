@@ -62,54 +62,18 @@ class SetUp extends React.Component {
         // Once state is reset using captured home coordinates
         // use callback function to POST captured long and lat to the /users endpoint to save the data
         // 
-        }, () => fetch('http://localhost:3000/users/', {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "lat": position.coords.latitude,
-                "long": position.coords.longitude
-            })
-            }).then(function(response) {
-                return response.json()
-                }).then((json) => {
-                console.log('parsed json: ', json);
-                // Once returned promise is resolved 
-                // Call function to start watching user's location
-                this.watchLocation();
-                }).catch(function(ex) {
-                console.log('parsing failed: ', ex)
-        }))
+        })
+            this.watchLocation();
     }
     
     // evaluateDistance function is a simuation of calling back-end to evaluate user's distance from initial location
     // The function calls endpoint /outside if a user is further away from home than 200m
     // The function calls endpoint /inside if a user is away by 200 or less meters
     evaluateDistance(position) {
-        this.getDistanceFromLatLonInKm(this.state.startLat,this.state.startLong, position.coords.latitude, position.coords.longitude)>0.2?
-        fetch('http://localhost:3000/outside/')
-        .then(function(response) {
-            return response.json()
-        }).then((json) => {
-            console.log('parsed json: ', json);
-            // Call displayNotification function once the returned promise is resolved
-            this.displayNotification(json);
-        }).catch(function(ex) {
-            console.log('parsing failed: ', ex)}
-        )
+        this.getDistanceFromLatLonInKm(this.state.startLat,this.state.startLong, position.coords.latitude, position.coords.longitude)>0.05?      
+        this.displayNotification(true)
         :
-        fetch('http://localhost:3000/inside/')
-        .then(function(response) {
-            return response.json()
-        }).then((json) => {
-            console.log('parsed json: ', json);
-            // Call displayNotification function once the returned promise is resolved
-            this.displayNotification(json);
-        }).catch(function(ex) {
-            console.log('parsing failed: ', ex)
-        })
+        this.displayNotification(false)
     }
 
     // Use Haversine formula to calculate the distance between home and current position based on respective long and lat values
@@ -156,22 +120,20 @@ class SetUp extends React.Component {
     }
 
     // Handle response returned from the back-end and display 'lock door' notification if necessary
-    displayNotification(json) {
-        json.map((location) => {
-            location.outside?
-            (this.state.notificationTrigerred === false?
-                (   
-                    alert("Do not forget to lock the door!"),
-                    this.setState({notificationTrigerred:true})
-                )
-                :null
+    displayNotification(outside) {
+        outside?
+        (this.state.notificationTrigerred === false?
+            (   
+                alert("Do not forget to lock the door!"),
+                this.setState({notificationTrigerred:true})
             )
-            : 
-            (this.state.notificationTrigerred === true?
-                this.setState({notificationTrigerred:false})
-                :null
-            )
-        })
+            :null
+        )
+        : 
+        (this.state.notificationTrigerred === true?
+            this.setState({notificationTrigerred:false})
+            :null
+        )
     }
 
     render() {
